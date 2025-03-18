@@ -1,0 +1,125 @@
+{% extends "./base.html" %}
+
+{% block body %}
+<div class="container">
+    <h1 class="text-center fw-bold">Список статей</h1>
+
+    <!-- Форма поиска и фильтрации -->
+    <form method="GET" class="mb-3">
+        <div class="d-flex mb-3">
+            <input type="text" name="q" value="{{ query }}" class="form-control w-100" placeholder="Поиск по статьям..."
+                aria-label="Поиск по статьям">
+            <button type="submit" class="btn btn-primary ms-2">Поиск</button>
+        </div>
+        <div class="row">
+            <!-- Боковая панель для фильтрации по категориям -->
+            <div class="col-md-3 mb-4">
+                <div class="mb-3">
+                    <label class="form-label">Фильтр по категориям</label>
+                    {% for category in categories %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="category" value="{{ category.id }}"
+                            id="category{{ category.id }}" {% if category.id|stringformat:"s" in selected_category %}
+                            checked{% endif %}>
+                        <label class="form-check-label" for="category{{ category.id }}">
+                            {{ category.name }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Применить фильтр</button>
+                <a href="{% url 'index' %}" class="btn btn-secondary mt-2 w-100">Очистить фильтры</a>
+            </div>
+
+            <!-- Основная область для отображения статей -->
+            <div class="col-md-9">
+                <div class="row">
+                    {% for article in page_obj %}
+                    <div class="col-12 mb-4">
+                        <a href="{% url 'article-detail' article.id %}?q={{ query }}{% for category in selected_category %}&category={{ category }}{% endfor %}"
+                            class="text-decoration-none text-dark">
+                            <div class="card">
+                                {% if article.image %}
+                                <img src="{{ article.image.url }}" class="card-img-top" alt="{{ article.title }}">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title mb-2 d-flex justify-content-between flex-wrap gap-2">
+                                        {{ article.title }}
+                                        <a href="?category={{ article.category.id }}"
+                                            class="badge bg-secondary fs-6 text-decoration-none category-badge">
+                                            {{ article.category.name }}</a>
+                                    </h5>
+                                    <span class="card-text">{{ article.description|truncatechars:150 }}</span>
+
+                                    <hr>
+                                    <div class="d-flex align-items-center flex-wrap justify-content-between">
+                                        <div class="article_text">
+                                            <p class="text-muted mb-0">
+                                                Опубликовано: {{ article.public_date|date:"d.m.Y H:i" }}
+                                            </p>
+                                            <p class="text-muted mb-0"> Комментарии: {{ article.comments.count }}</p>
+                                        </div>
+                                        <a href="{% url 'article-detail' article.id %}?q={{ query }}{% for category in selected_category %}&category={{ category }}{% endfor %}"
+                                            class="btn btn-primary col-lg-3 col-md-3 col-sm-4 col-12 mt-2">Читать
+                                            далее</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% empty %}
+                    <p>Статьи не найдены</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Пагинация -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page=1{% if query %}&q={{ query }}{% endif %}{% for category in selected_category %}&category={{ category }}{% endfor %}">&laquo;
+                                Первая</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% for category in selected_category %}&category={{ category }}{% endfor %}">Назад</a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% for category in selected_category %}&category={{ category }}{% endfor %}">Вперед</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% for category in selected_category %}&category={{ category }}{% endfor %}">Последняя
+                                &raquo;</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block style %}
+<style>
+    .category-badge {
+        transition: all .15s;
+    }
+
+    .category-badge:hover {
+        background-color: #0d6efd !important;
+        color: white;
+    }
+</style>
+{% endblock %}

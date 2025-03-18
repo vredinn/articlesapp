@@ -1,0 +1,64 @@
+{% extends "./base.html" %}
+
+{% block body %}
+<div class="container mt-4">
+    <!-- Кнопка вернуться к списку статей -->
+    <div class="text-center mb-4">
+        <a href="{% url 'index' %}?q={{ request.GET.q }}{% for category in categories %}&category={{ category }}{% endfor %}"
+            class="btn btn-secondary">Вернуться к списку статей</a>
+    </div>
+    <!-- Заголовок статьи -->
+    <h1 class="text-center fw-bold">{{ article.title }}</h1>
+
+    <!-- Категория -->
+    <p class="text-center text-muted">Категория: <strong>{{ article.category.name }}</strong></p>
+
+    <!-- Изображение статьи -->
+    <div class="text-center">
+        <img src="{{ article.image.url }}" class="img-fluid d-block mx-auto rounded shadow-sm"
+            style="max-height: 400px; object-fit: cover;" alt="{{ article.title }}">
+    </div>
+
+    <!-- Описание статьи -->
+    <div class="mt-3 p-3 border rounded bg-light shadow-sm">
+        <p class="fs-5 text-justify">{{ article.description|linebreaks }}</p>
+    </div>
+
+    <hr>
+
+    <!-- Форма для добавления комментариев -->
+    <h3>Оставить комментарий</h3>
+    <form id="commentForm" method="POST"
+        action="{% url 'article-detail' article.id %}?q={{ request.GET.q }}{% for category in categories %}&category={{ category }}{% endfor %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="username" class="form-label">Имя</label>
+            <input type="text" name="username" id="username" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="comment_text" class="form-label">Комментарий</label>
+            <textarea name="comment_text" id="comment_text" class="form-control" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Добавить комментарий</button>
+    </form>
+
+    <hr>
+
+    <!-- Список комментариев -->
+    <h3>Комментарии (<span id="commentCount">{{ article.comments.count }}</span>)</h3>
+    <div id="commentList">
+        {% for comment in article.comments.all %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ comment.username }}</h5>
+                <h6 class="card-subtitle text-muted">{{ comment.comment_date|date:"d.m.Y H:i" }}</h6>
+                <p class="card-text mt-2">{{ comment.comment_text }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <p>Комментариев пока нет. Будьте первым!</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
