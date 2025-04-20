@@ -68,7 +68,7 @@
                         </a>
                     </div>
                     {% empty %}
-                    <p>Статьи не найдены</p>
+                    <p class="not_found">Статьи не найдены</p>
                     {% endfor %}
                 </div>
 
@@ -120,6 +120,10 @@
     .category-badge:hover {
         background-color: #0d6efd !important;
         color: white;
+    }
+
+    .not_found {
+        text-align: center;
     }
 </style>
 {% endblock %}

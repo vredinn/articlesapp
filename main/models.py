@@ -11,9 +11,7 @@ class Category(models.Model):
 class Article(models.Model):
     title = models.CharField(max_length=255, blank=False)
     description = models.TextField(blank=True)
-    public_date = models.DateTimeField(
-        blank=False, auto_now_add=True
-    )  # Changed to DateTimeField
+    public_date = models.DateTimeField(blank=False, auto_now_add=True)
     image = models.ImageField(upload_to="images", blank=True)
     category = models.ForeignKey(
         Category,
@@ -36,6 +34,11 @@ class Comment(models.Model):
         blank=False, auto_now_add=True
     )  # Changed to DateTimeField
     comment_text = models.TextField(blank=False)
+
+    class Meta:
+        ordering = [
+            "-comment_date"
+        ]  # Сортировка по дате комментария в обратном порядке
 
     def __str__(self):
         return f"{self.username} в {self.comment_date} в статье {self.article}"
